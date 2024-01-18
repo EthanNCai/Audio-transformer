@@ -1,0 +1,27 @@
+/data/*
+
+# 忽略所有__pycache__文件夹
+__pycache__/
+
+# 忽略所有.py文件的编译缓存文件
+*.pyc
+*.pyo
+*.pyd
+
+# 忽略IDE生成的文件夹和文件
+.idea/
+.vscode/
+*.iml
+
+# 忽略日志文件
+*.log
+logs/
+
+# 忽略临时文件
+*.tmp
+*.swp
+*.swo
+
+# 忽略已经生成的数据或媒体文件
+data/
+media/
