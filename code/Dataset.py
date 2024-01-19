@@ -12,12 +12,13 @@ class UrbanSound8K(Dataset):
         self.root = dataset_root
         self.sample = []
         try:
-            # 尝试加载文件
+            print("loading from files....")
             with open('u8k.pkl', 'rb') as f:
                 self.sample = pickle.load(f)
 
         except FileNotFoundError:
 
+            print("generating new data....")
             item_list = pd.read_csv(os.path.join(self.root, 'UrbanSound8K.csv'))
             for index, item in item_list.iterrows():
                 # fetch necessary information of one sample
@@ -62,22 +63,24 @@ class UrbanSound8K(Dataset):
         return len(self.sample)
 
 
-dataset_train = UrbanSound8K(dataset_root='../data/UrbanSound8k', unified_sample_rate=22050, unified_sec=4,
-                             mode='train',
-                             train_ratio=0.8)
+def test():
 
-dataset_test = UrbanSound8K(dataset_root='../data/UrbanSound8k', unified_sample_rate=22050, unified_sec=4,
-                            mode='test',
-                            train_ratio=0.8)
+    dataset_train = UrbanSound8K(dataset_root='../data/UrbanSound8k', unified_sample_rate=22050, unified_sec=4,
+                                 mode='train',
+                                 train_ratio=0.8)
 
-train_loader = DataLoader(dataset=dataset_train, batch_size=2, shuffle=True, drop_last=True)
-test_loader = DataLoader(dataset=dataset_test, batch_size=2, shuffle=False, drop_last=True)
+    dataset_test = UrbanSound8K(dataset_root='../data/UrbanSound8k', unified_sample_rate=22050, unified_sec=4,
+                                mode='test',
+                                train_ratio=0.8)
+
+    train_loader = DataLoader(dataset=dataset_train, batch_size=2, shuffle=True, drop_last=True)
+    test_loader = DataLoader(dataset=dataset_test, batch_size=2, shuffle=False, drop_last=True)
 
 
-for i, data in enumerate(train_loader):
-    inputs, label = data
-    print(inputs, label)
-    break
-    
-# print -> 128 128
+    for i, data in enumerate(train_loader):
+        inputs, label = data
+        print(inputs, label)
+        break
+
+    # print -> 128 128
 

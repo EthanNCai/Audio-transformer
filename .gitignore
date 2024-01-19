@@ -25,3 +25,4 @@ logs/
 # 忽略已经生成的数据或媒体文件
 data/
 media/
+code/u8k.pkl

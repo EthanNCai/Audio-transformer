@@ -28,8 +28,10 @@ class DownSampling(nn.Module):
         self.audio_net = FCNet(1360, 1360 // 2, 10)
 
     def forward(self, x):
+
         x = self.layers(x)
         x = torch.flatten(x, start_dim=1)  # 展平为一维
+
         x = self.audio_net(x)  # 使用修改后的输入大小
         return x
 
