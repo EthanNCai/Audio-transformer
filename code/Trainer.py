@@ -10,20 +10,20 @@ unified_sample_rate = 22050
 unified_sec = 4
 classes = 10
 learning_rate = 0.001
-epochs = 100
+epochs = 30
 
 dataset_train = UrbanSound8K(dataset_root='../data/UrbanSound8k', unified_sample_rate=unified_sample_rate,
                              unified_sec=unified_sec,
                              mode='train',
-                             train_ratio=0.8)
+                             train_ratio=0.9)
 
 dataset_test = UrbanSound8K(dataset_root='../data/UrbanSound8k', unified_sample_rate=unified_sample_rate,
                             unified_sec=unified_sec,
                             mode='test',
-                            train_ratio=0.8)
+                            train_ratio=0.9)
 
-train_loader = DataLoader(dataset=dataset_train, batch_size=31, shuffle=True, drop_last=True)
-test_loader = DataLoader(dataset=dataset_test, batch_size=31, shuffle=False, drop_last=True)
+train_loader = DataLoader(dataset=dataset_train, batch_size=512, shuffle=True, drop_last=True)
+test_loader = DataLoader(dataset=dataset_test, batch_size=512, shuffle=False, drop_last=True)
 
 model = DownSampling(unified_sample_rate * unified_sec)
 model = model.to(device)
@@ -43,7 +43,7 @@ for epoch in range(epochs):
         loss.backward()
         optimizer.step()
 
-        if (i + 1) % 100 == 0:
+        if (i + 1) % 2 == 0:
             print('Epoch [{}/{}], Step [{}/{}], Loss: {:.4f}'.format(epoch + 1, epochs, i + 1, total_step,
                                                                      loss.item()))
 

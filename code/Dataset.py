@@ -12,9 +12,10 @@ class UrbanSound8K(Dataset):
         self.root = dataset_root
         self.sample = []
         try:
-            print("loading from files....")
+
             with open('u8k.pkl', 'rb') as f:
                 self.sample = pickle.load(f)
+            print("loading from files....")
 
         except FileNotFoundError:
 
@@ -43,7 +44,8 @@ class UrbanSound8K(Dataset):
                     # Pad the audio waveform with zeros at the end
                     audio_wave = np.pad(audio_wave, (0, desired_length - current_length), 'constant')
 
-                self.sample.append((torch.from_numpy(audio_wave.astype(np.float32)), int(label)))
+                audio_wave = torch.from_numpy(audio_wave)
+                self.sample.append((audio_wave, label))
 
             # split the dataset
             num_train_samples = int(len(self.sample) * train_ratio)
@@ -64,7 +66,6 @@ class UrbanSound8K(Dataset):
 
 
 def test():
-
     dataset_train = UrbanSound8K(dataset_root='../data/UrbanSound8k', unified_sample_rate=22050, unified_sec=4,
                                  mode='train',
                                  train_ratio=0.8)
@@ -76,7 +77,6 @@ def test():
     train_loader = DataLoader(dataset=dataset_train, batch_size=2, shuffle=True, drop_last=True)
     test_loader = DataLoader(dataset=dataset_test, batch_size=2, shuffle=False, drop_last=True)
 
-
     for i, data in enumerate(train_loader):
         inputs, label = data
         print(inputs, label)
@@ -84,3 +84,5 @@ def test():
 
     # print -> 128 128
 
+
+# test()
