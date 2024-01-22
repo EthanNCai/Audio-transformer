@@ -80,6 +80,7 @@ def test():
     for i, data in enumerate(train_loader):
         inputs, label = data
         print(inputs, label)
+        print(inputs.shape)
         break
 
     # print -> 128 128

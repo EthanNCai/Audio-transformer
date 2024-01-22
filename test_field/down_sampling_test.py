@@ -21,6 +21,21 @@ class AADownsample(nn.Module):
         return y
 
 
+class MidLayer(nn.Module):
+    def __init__(self, input_size, output_size, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.linear1 = nn.Linear(input_size, output_size)
+        self.linear2 = nn.Linear(output_size // 2, output_size)
+        self.relu = nn.LeakyReLU(0.2, True)
+
+    def forward(self, x_):
+        x_ = self.linear1(x_)
+        x_ = self.relu(x_)
+        x_ = self.linear2(x_)
+        x_ = self.relu(x_)
+        return x_
+
+
 class Down(nn.Module):
     def __init__(self, channels, stride=2, k=3):
         super().__init__()
@@ -43,10 +58,10 @@ channels = 16
 stride = 2
 k = 3
 down_module = Down(channels, stride, k)
-down_module1 = Down(channels*2, stride, k)
-down_module2 = Down(channels*4, stride, k)
-down_module3 = Down(channels*8, stride, k)
-down_module4 = Down(channels*16, stride, k)
+down_module1 = Down(channels * 2, stride, k)
+down_module2 = Down(channels * 4, stride, k)
+down_module3 = Down(channels * 8, stride, k)
+down_module4 = Down(channels * 16, stride, k)
 
 # 随机生成一个输入张量
 batch_size = 4
