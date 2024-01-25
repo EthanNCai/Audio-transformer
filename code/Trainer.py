@@ -2,15 +2,15 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader
-from Model import FC, DownSampling, ChickenNet
+from Model import ChickenNet, DownSampling, TransformerModule
 from Dataset import UrbanSound8K
 
-device = torch.device("cpu" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 unified_sample_rate = 22050
 unified_sec = 4
 classes = 10
-learning_rate = 0.0002
-epochs = 30
+learning_rate = 0.001
+epochs = 50
 
 dataset_train = UrbanSound8K(dataset_root='../data/UrbanSound8k', unified_sample_rate=unified_sample_rate,
                              unified_sec=unified_sec,
@@ -22,8 +22,8 @@ dataset_test = UrbanSound8K(dataset_root='../data/UrbanSound8k', unified_sample_
                             mode='test',
                             train_ratio=0.9)
 
-train_loader = DataLoader(dataset=dataset_train, batch_size=32, shuffle=True, drop_last=True)
-test_loader = DataLoader(dataset=dataset_test, batch_size=32, shuffle=False, drop_last=True)
+train_loader = DataLoader(dataset=dataset_train, batch_size=64, shuffle=True, drop_last=True)
+test_loader = DataLoader(dataset=dataset_test, batch_size=64, shuffle=False, drop_last=True)
 
 model = ChickenNet()
 model = model.to(device)
@@ -45,8 +45,8 @@ for epoch in range(epochs):
         loss.backward()
         optimizer.step()
 
-        print('\rEpoch [{}/{}], Batch [{}/{}], Loss: {:.4f}'.format(epoch + 1, epochs, i + 1, total_step,
-                                                                    loss.item()), end='')
+        print('Epoch [{}/{}], Batch [{}/{}], Loss: {:.4f}'.format(epoch + 1, epochs, i + 1, total_step,
+                                                                    loss.item()))
 
 model.eval()
 with torch.no_grad():

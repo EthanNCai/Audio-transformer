@@ -26,55 +26,16 @@ class DownSampling(nn.Module):
             nn.BatchNorm1d(8),
             nn.LeakyReLU(0.2, True),
 
+            nn.Conv1d(8, 16, kernel_size=self.kernel_size, stride=self.stride, dilation=self.dilation),
+            nn.MaxPool1d(kernel_size=self.kernel_size, stride=self.stride),
+            nn.BatchNorm1d(16),
+            nn.LeakyReLU(0.2, True),
+
         ]
         self.layers = nn.Sequential(*layers)
 
     def forward(self, x):
         x = self.layers(x)
-        return x
-
-
-class FC(nn.Module):
-    def __init__(self, num_classes):
-        super(FC, self).__init__()
-        self.flatten = nn.Flatten()
-        self.fc1 = nn.LazyLinear(num_classes)
-        self.bn = nn.BatchNorm1d(num_classes)
-        self.relu = nn.ReLU()
-
-    def forward(self, x):
-        out = self.flatten(x)
-        out = self.fc1(out)
-        out = self.bn(out)
-        out = self.relu(out)
-        return out
-
-
-class EmbeddingFC(nn.Module):
-    def __init__(self, output_size, *args, **kwargs):
-        super(EmbeddingFC, self).__init__(*args, **kwargs)
-
-        self.linear1 = nn.LazyLinear(output_size)
-        self.bn = nn.BatchNorm1d(output_size)
-        self.relu = nn.LeakyReLU(0.2, True)
-
-    def forward(self, x_):
-        out = x_.view(x_.size(0), -1)
-        x_ = self.linear1(x_)
-        x_ = self.bn(x_)
-        x_ = self.relu(x_)
-        return x_
-
-
-class UnifiedFC(nn.Module):
-    def __init__(self, out_shape):
-        super().__init__()
-        self.flatten = nn.Flatten()
-        self.linear = nn.LazyLinear(out_shape)
-
-    def forward(self, x):
-        x = self.flatten(x)
-        x = self.linear(x)
         return x
 
 
@@ -90,15 +51,15 @@ class Transformer(nn.Module):
         return x
 
 
-class ChickenNet(nn.Module):
+class TransformerModule(nn.Module):
 
-    def __init__(self):
+    def __init__(self, wave_size=88200, batch_size=32, patch_size=420, embedded_size=512):
         super().__init__()
         # train params
-        self.batch_size = 32
-        self.wave_size = 88200
+        self.batch_size = batch_size
+        self.wave_size = wave_size
         self.num_classes = 10
-        self.patch_size = 100
+        self.patch_size = patch_size
 
         # transformer params
         self.num_heads = 8
@@ -115,7 +76,6 @@ class ChickenNet(nn.Module):
         self.transformer_encoder = Transformer(self.embedded_size, self.num_heads)
         self.flatten = nn.Flatten()
         self.dropout = nn.Dropout(0.1)
-        self.down_module = DownSampling()
 
     def get_batch_expanded_cls_token(self):
         return self.cls_token.expand([self.batch_size, -1, -1])
@@ -139,9 +99,43 @@ class ChickenNet(nn.Module):
         return result
 
 
-def test():
-    model = ChickenNet()
-    x = torch.randn(64, 1, 88200)
-    x = model(x)
+class ChickenNet(nn.Module):
 
+    def __init__(self):
+        super().__init__()
+        self.batch_size = 64
+        self.num_classes = 10
+        self.flatten = nn.Flatten(1)
+        self.down_module = DownSampling()
+        self.transformer_module = TransformerModule(wave_size=5472, batch_size=self.batch_size, patch_size=16,
+                                                    embedded_size=64)
+        self.fc = FC(self.num_classes)
+
+    def forward(self, x):
+        x = self.down_module(x)
+        x = self.flatten(x)
+        # x = self.fc(x)
+        x = self.transformer_module(x)
+        return x
+
+
+class FC(nn.Module):
+    def __init__(self, num_classes):
+        super(FC, self).__init__()
+        self.fc1 = nn.LazyLinear(num_classes)
+        self.bn = nn.BatchNorm1d(num_classes)
+        self.relu = nn.ReLU()
+
+    def forward(self, x):
+        out = self.fc1(x)
+        out = self.bn(out)
+        out = self.relu(out)
+        return out
+
+
+def test():
+    chicken_net = ChickenNet()
+    x = torch.randn(128, 1, 88200)
+    x = chicken_net(x)
+    print(x.shape)
 
